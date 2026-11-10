@@ -1,0 +1,21 @@
+[project]
+name = "cleantech-rag"
+version = "0.2.0"
+description = "Cleantech retrieval-augmented generation workshop"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "chromadb>=1.5.9", "datasets>=4.8.5,<5", "gdown>=6.5.1", "kaggle>=2.2.5",
+    "langchain-chroma>=1.1.0", "langchain-core>=1.7.4", "langchain-experimental>=0.4.1,<0.4.2",
+    "langchain-huggingface>=1.2.3", "langchain-openai>=1.7.3", "langchain-text-splitters>=1.1.3",
+    "langdetect>=1.0.9", "lorem-text>=3.0", "matplotlib>=3.11.2", "nbformat>=5.11.1", "numpy>=2.5.4", "pandas>=3.1.0",
+    "plotly>=7.1.0", "python-dotenv>=1.2.4", "ragas>=0.4.3", "seaborn>=0.13.2", "sentence-transformers>=5.7.0,<6",
+    "spacy>=3.8.18", "textstat>=0.7.13", "torch>=2.15.0", "tqdm>=4.70.1", "transformers>=4.57.6", "umap-learn>=0.5.12",
+    "ipykernel>=7.4.0", "jupyterlab>=4.6.5", "nbconvert>=7.17.2",
+]
+
+[tool.uv]
+package = false
+# Ragas 0.4.3 imports VertexAI modules removed in community 0.4.2.
+# Transformers 4.57 is the stack the Qwen3 embeddings were computed and validated with.
+constraint-dependencies = ["langchain-community<0.4.2", "transformers<5"]

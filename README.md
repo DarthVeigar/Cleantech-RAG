@@ -1,47 +1,110 @@
 # Cleantech RAG
 
-By [Daniel Perruchoud](https://www.linkedin.com/in/daniel-olivier-perruchoud-799aaa38/) and [George Rowlands](https://www.linkedin.com/in/georgerowlands/)
+By [Daniel Perruchoud](https://www.linkedin.com/in/daniel-olivier-perruchoud-799aaa38/) and [George Rowlands](https://www.linkedin.com/in/georgerowlands/).
 
-## Introduction
+A hands-on workshop exploring cleantech news, preprocessing, recursive and semantic chunking, local embeddings, Chroma retrieval, RAG, evaluation, multi-query retrieval, HyDE and reranking. The data comes from the [Cleantech Media Dataset](https://www.kaggle.com/datasets/jannalipenkova/cleantech-media-dataset).
 
-This notebook delves into the exciting realm of Cleantech using a [dataset of nearly 10,000 news articles from Kaggle](https://www.kaggle.com/datasets/jannalipenkova/cleantech-media-dataset), all centered around the energy sector. We'll embark on a journey that includes data exploration, text preprocessing, and culminates in the creation of a Retrieval-Augmented Generation Pipeline (RAG). This powerful approach empowers us to construct an LLM (Large Language Model) that can intelligently answer user queries, drawing upon the knowledge from our curated news articles.
+## Models
 
-### Why RAG? A Cost-Effective and Dynamic Solution
+| Role | Model | Runs |
+| --- | --- | --- |
+| Generator (RAG answers, reference answers, multi-query, HyDE) | `gpt-6.1-sol` | OpenAI API |
+| Judge (RAGAS metrics) | `gpt-6-luna` | OpenAI API |
+| Embeddings (chunks, queries, semantic chunking, RAGAS similarity) | [`Qwen/Qwen3-Embedding-4B`](https://huggingface.co/Qwen/Qwen3-Embedding-4B) | local |
+| Reranker | [`Qwen/Qwen3-Reranker-4B`](https://huggingface.co/Qwen/Qwen3-Reranker-4B) | local |
 
-Fine-tuning an LLM can be a resource-intensive and inflexible process. RAG offers a compelling alternative. It leverages a semantic search to pinpoint relevant sections within our news articles that directly address a user's question. These retrieved sections are then provided to the LLM as context, enabling it to deliver informed and insightful responses.
+The model IDs are constants in the notebook (`GENERATOR_MODEL`, `JUDGE_MODEL`, `EMBEDDING_MODEL`, `RERANKER_MODEL`). Both Qwen models are pinned to a Hugging Face revision because the precomputed document embeddings are only valid with exactly the same model.
 
-![rag_pipline](https://arxiv.org/html/2312.10997v5/extracted/2312.10997v5/images/RAG_case.png)
+The notebook picks the device the usual way: `cuda` if `torch.cuda.is_available()`, else `mps` if `torch.backends.mps.is_available()`, else `cpu`. GPUs use half precision (bfloat16 on CUDA GPUs that support it, otherwise float16).
 
-### Setup
+**Memory:** each 4B model needs about 8 GB in half precision, so the reranking section needs about 16 GB of GPU or unified memory. A free Colab T4 (15 GB) fits the embedding model but not both; use an L4/A100 runtime or skip the reranker cells (the reranked evaluation results load from the data ZIP either way). CPU-only runs work but are slow, and need about 32 GB of RAM for both models in float32.
 
-To run this notebook we recommend downloading the provided [GitHub repository](https://github.com/LuciferUchiha/sds2024-cleantech-rag) and opening this notebook in [Google Colab](https://colab.research.google.com/). To ensure a smooth experience, you'll need:
+## Local setup: uv and Python 3.13
 
-- An OpenAI API key for GPT-4o
-- A Google account for Google Colab
-- Python packages (automatically installed within the notebook)
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run from this repository:
 
-At the start of the notebook a `data.zip` will be downloaded from a Google Drive and unzipped. This will then provide you with files that contain checkpoints for all of the expensive processing sections such as chunking, generating embeddings and evaluating the pipeline with an LLM as a judge. This saves you money and a lot of time.
+```sh
+uv sync --locked
+cp .env.example .env
+# Add your OPENAI_API_KEY to .env for generation and LLM evaluation.
+uv run jupyter lab cleantech_rag.ipynb
+```
 
-If you can't or don't want to run this notebook you can also view the completed notebook by opening the `cleantech_rag.html` file in your browser.
+uv installs Python 3.13 if needed. Select the environment's Python kernel. The notebook prompts for a missing API key without saving it. The model weights (about 16 GB for both Qwen models) are downloaded on first use.
 
-### Unveiling the Depths of RAG Pipelines
+## Workshop data (`data.zip`)
 
-Throughout this notebook, we'll delve into the intricate workings of RAG pipelines. Prepare to explore:
+Calculating everything from the raw CSVs takes several hours on a laptop GPU and costs API credits. The notebook therefore downloads `data.zip` from Google Drive in its first data cells. The archive contains:
 
-- Building a Robust RAG Pipeline:
-  - LLM: GPT-4o
-  - Semantic Search: ChromaDB with HNSW for fast retrieval
-  - Embedding Models: Alibaba, BGE-M3, all-MiniLM-L6-v2
-  - Chunking Strategies: Recursive (256 & 1024 chunk sizes) and Semantic Chunking
-- Understanding RAG's Inner Workings:
-  - Examining the embedding space of news articles
-  - Demystifying the semantic search process
-- Visualization and Explanation:
-  - Visualizing the impact of advanced strategies like HyDE and Multi-querying
-- Evaluation and Comparison:
-  - RAGAS for LLM-based evaluation
-  - Traditional retrieval metrics
+- `data/bronze/`: the raw Kaggle CSVs
+- `data/silver/chunks/`, `data/silver/embeddings/`: chunks per splitter and their Qwen3 document embeddings (float16 `.npy`, rows aligned with the chunk JSON)
+- `data/silver/synthetic_eval.csv`: 25 synthetic question/answer pairs generated by GPT-6.1 Sol (the 23 human questions and their reference answers come from the evaluation CSV in `bronze/`)
+- `data/gold/chromadb/`: the Chroma indexes
+- `data/gold/datasets/`, `data/gold/results/`: generated RAG answers and RAGAS results per pipeline
+- `data/gold/retrieval_metrics.csv`: article-level hit-rate/MRR@3, with and without reranking
 
-Questions or Issues? We're Here to Help!
+Every step first looks for its result on disk, so with the archive extracted the notebook only loads files. API calls remain for the interactive example cells. Queries are still embedded locally, so the embedding model is still needed.
 
-If you encounter any roadblocks or have questions, please don't hesitate to reach out to [George Rowlands](https://www.linkedin.com/in/georgerowlands/)
+The archive is shared on [Google Drive](https://drive.google.com/file/d/1o0OgbwnAGsgQnf45vY0xIblA-vOP60Ty/view?usp=sharing); its file ID is set in `DATA_ZIP_DRIVE_ID` in the notebook's download cell. If you publish a new archive, upload it, share it as "Anyone with the link" and replace that ID.
+
+With `DOWNLOAD_DATA = False` or an empty Drive ID, the notebook calculates everything itself. Delete a file or folder below `data/` to recompute only that step. Never mix embeddings from different models, revisions, chunking settings, normalization or query prompts; if you change any of those, delete the corresponding chunks, embeddings, indexes, datasets and results.
+
+You can also place the raw CSVs from Kaggle in `data/bronze/` yourself (or use the optional Kaggle download cells). The loader selects the latest matching filename and accepts both the original comma-delimited evaluation file and the newer semicolon-delimited schema.
+
+## Google Colab
+
+Hosted Colab has its own interpreter and does not switch kernels when `uv sync` creates a virtual environment. The Colab path therefore installs the exported dependencies into Colab's current interpreter:
+
+```python
+!git clone https://github.com/DarthVeigar/Cleantech-RAG.git
+%cd Cleantech-RAG
+%pip install -r requirements.txt
+```
+
+Restart the Colab runtime after installation, then continue from the imports. Select a GPU runtime (see the memory note above). The requirements export is generated for Python 3.13; test it again on the runtime offered for your workshop date.
+
+## Maintenance
+
+`pyproject.toml` declares direct dependencies; `uv.lock` fixes the resolved environment; `requirements.txt` is a generated export for Colab:
+
+```sh
+uv lock --upgrade
+uv sync --locked
+uv export --frozen --no-dev --no-hashes --no-emit-project --output-file requirements.txt
+uv run jupyter nbconvert --to html cleantech_rag.ipynb
+```
+
+**Compatibility notes.** Ragas 0.4.3 imports VertexAI classes removed in `langchain-community` 0.4.2, so Community and Experimental stay at 0.4.1. Transformers stays below 5 because the shipped embeddings were computed and validated with 4.57.6; lifting it requires re-validating the embeddings. The GPT-6 models accept only the default temperature and one completion per request, so the RAGAS judge wrapper uses `bypass_temperature=True, bypass_n=True`. RAGAS compares texts with each other (question vs. generated question, answer vs. reference), so it gets the Qwen embeddings without the query instruction (`SymmetricEmbeddings`). Context precision with reference replaced the removed `context_relevancy` metric; scores are not comparable with the 2024 workshop.
+
+## Reference run (10 November 2026)
+
+Apple M2 Pro (32 GB), macOS, Python 3.13.2, PyTorch 2.15.0, Transformers 4.57.6, both Qwen models in float16 on `mps`. The run started from the raw CSVs, with no cached data.
+
+- Of the 20,111 raw articles, 20,106 remain after preprocessing (the language filter removes 5); the stratified sample contains 1,004 articles. The splitters produced 28,530 (recursive 256), 6,044 (recursive 1024) and 3,302 (semantic) chunks: 37,876 vectors of 2,560 dimensions.
+- Runtime: 7 h 41 min for the full notebook. Semantic chunking took 1 h 43 min and embedding the chunks 3 h 40 min, both dominated by Qwen3-Embedding-4B on the laptop GPU. The evaluation stage (answer generation and RAGAS judging for 7 pipeline runs) took about 2 h.
+- `data.zip`: 595 MB (882 MB extracted).
+- The run used the OpenAI API: GPT-6.1 Sol for answers, synthetic questions, query variations and hypothetical documents; GPT-6 Luna for 7 × 48 RAGAS evaluations.
+
+RAGAS means over the 48 evaluation questions (23 human, 25 synthetic):
+
+| Pipeline | Faithfulness | Answer relevancy | Context precision | Answer correctness |
+| --- | --- | --- | --- | --- |
+| recursive 1024 (`selected`, run 1) | 0.83 | 0.84 | 0.90 | 0.58 |
+| recursive 1024 (run 2) | 0.84 | 0.84 | 0.90 | 0.56 |
+| recursive 1024 + rerank | 0.86 | 0.84 | 0.90 | 0.58 |
+| semantic | 0.88 | 0.82 | 0.85 | 0.53 |
+| recursive 1024 + HyDE | 0.85 | 0.85 | 0.84 | 0.54 |
+| recursive 1024 + multi-query | 0.80 | 0.87 | 0.85 | 0.51 |
+| recursive 256 | 0.74 | 0.84 | 0.72 | 0.49 |
+
+The two runs of the identical baseline differ by 0.02 in answer correctness, so treat differences below about 0.03 as noise. Article-level retrieval on the 23 human questions (`data/gold/retrieval_metrics.csv`):
+
+| Index | Hit rate@3 | MRR@3 | + rerank hit rate@3 | + rerank MRR@3 |
+| --- | --- | --- | --- | --- |
+| recursive 1024 | 21/23 | 0.84 | 22/23 | 0.88 |
+| recursive 256 | 21/23 | 0.88 | 21/23 | 0.89 |
+| semantic | 18/23 | 0.74 | 19/23 | 0.78 |
+
+**Data ZIP check:** in a fresh copy of the repository containing only `data.zip` (no `data/` folder), the notebook extracted the archive and ran top to bottom in 6.9 minutes on the same Mac. All 20 cached steps loaded from disk and none was recomputed. The remaining time is EDA (language detection about 2 minutes), model loading and the interactive example calls.
+
+The paid generation/judging path was run with the models above. A hosted Colab GPU was **not** tested.
