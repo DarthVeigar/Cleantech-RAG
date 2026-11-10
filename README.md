@@ -1,5 +1,7 @@
 # Cleantech RAG
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/DarthVeigar/Cleantech-RAG/blob/main/cleantech_rag.ipynb)
+
 By [Daniel Perruchoud](https://www.linkedin.com/in/daniel-olivier-perruchoud-799aaa38/) and [George Rowlands](https://www.linkedin.com/in/georgerowlands/).
 
 A hands-on workshop exploring cleantech news, preprocessing, recursive and semantic chunking, local embeddings, Chroma retrieval, RAG, evaluation, multi-query retrieval, HyDE and reranking. The data comes from the [Cleantech Media Dataset](https://www.kaggle.com/datasets/jannalipenkova/cleantech-media-dataset).
@@ -53,15 +55,14 @@ You can also place the raw CSVs from Kaggle in `data/bronze/` yourself (or use t
 
 ## Google Colab
 
-Hosted Colab has its own interpreter and does not switch kernels when `uv sync` creates a virtual environment. The Colab path therefore installs the exported dependencies into Colab's current interpreter:
+Click the **Open in Colab** badge above, then:
 
-```python
-!git clone https://github.com/DarthVeigar/Cleantech-RAG.git
-%cd Cleantech-RAG
-%pip install -r requirements.txt
-```
+1. Choose a GPU runtime: *Runtime → Change runtime type* (see the memory note above).
+2. Add your OpenAI key as a Colab secret named `OPENAI_API_KEY` (key icon in the left sidebar) and allow notebook access. Without it, the notebook asks for the key.
+3. *Runtime → Run all*. The setup cells clone this repository into `/content/Cleantech-RAG`, install the pinned dependencies from `requirements.txt` into Colab's interpreter, and restart the runtime once.
+4. After the restart, *Runtime → Run all* again. The clone and installation are skipped, `data.zip` is downloaded from Google Drive and the notebook continues.
 
-Restart the Colab runtime after installation, then continue from the imports. Select a GPU runtime (see the memory note above). The requirements export is generated for Python 3.13; test it again on the runtime offered for your workshop date.
+The pinned requirements resolve for Linux on Python 3.12 and 3.13. Test them again on the Colab runtime available for your workshop date.
 
 ## Maintenance
 

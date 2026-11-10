@@ -7802,7 +7802,8 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h1 id="Cleantech-RAG">Cleantech RAG<a class="anchor-link" href="#Cleantech-RAG">¶</a></h1><p>By <a href="https://www.linkedin.com/in/daniel-olivier-perruchoud-799aaa38/">Daniel Perruchoud</a> and <a href="https://www.linkedin.com/in/georgerowlands/">George Rowlands</a></p>
+<h1 id="Cleantech-RAG">Cleantech RAG<a class="anchor-link" href="#Cleantech-RAG">¶</a></h1><p><a href="https://colab.research.google.com/github/DarthVeigar/Cleantech-RAG/blob/main/cleantech_rag.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg"/></a></p>
+<p>By <a href="https://www.linkedin.com/in/daniel-olivier-perruchoud-799aaa38/">Daniel Perruchoud</a> and <a href="https://www.linkedin.com/in/georgerowlands/">George Rowlands</a></p>
 <h2 id="Introduction">Introduction<a class="anchor-link" href="#Introduction">¶</a></h2><p><strong>Dataset versions:</strong> the narrative observations below describe the original 2024 run. The newer public export contains 20,111 raw articles, so rerun the cells and interpret their actual outputs; historical counts and conclusions need not match.</p>
 <p>This notebook delves into the exciting realm of Cleantech using a <a href="https://www.kaggle.com/datasets/jannalipenkova/cleantech-media-dataset">dataset of nearly 10,000 news articles from Kaggle</a>, all centered around the energy sector. We'll embark on a journey that includes data exploration, text preprocessing, and culminates in the creation of a Retrieval-Augmented Generation Pipeline (RAG). This powerful approach empowers us to construct an LLM (Large Language Model) that can intelligently answer user queries, drawing upon the knowledge from our curated news articles.</p>
 <h3 id="Why-RAG?-A-Cost-Effective-and-Dynamic-Solution">Why RAG? A Cost-Effective and Dynamic Solution<a class="anchor-link" href="#Why-RAG?-A-Cost-Effective-and-Dynamic-Solution">¶</a></h3><p>Fine-tuning an LLM can be a resource-intensive and inflexible process. RAG offers a compelling alternative. It leverages a semantic search to pinpoint relevant sections within our news articles that directly address a user's question. These retrieved sections are then provided to the LLM as context, enabling it to deliver informed and insightful responses.</p>
@@ -7847,7 +7848,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Credentials">Credentials<a class="anchor-link" href="#Credentials">¶</a></h2><p>Embeddings and reranking run locally on CUDA, Apple Metal (MPS), or CPU. Answer generation and LLM evaluation use the OpenAI API. Set <code>OPENAI_API_KEY</code> in your environment or a local <code>.env</code> file (see <code>.env.example</code>). Never save keys in notebook cells.</p>
+<h2 id="Credentials">Credentials<a class="anchor-link" href="#Credentials">¶</a></h2><p>Embeddings and reranking run locally on CUDA, Apple Metal (MPS), or CPU. Answer generation and LLM evaluation use the OpenAI API. Set <code>OPENAI_API_KEY</code> in your environment or a local <code>.env</code> file (see <code>.env.example</code>). Never save keys in notebook cells. In Google Colab, add <code>OPENAI_API_KEY</code> as a secret (key icon in the left sidebar) and allow notebook access, or paste the key when prompted.</p>
 </div>
 </div>
 </div>
@@ -7872,7 +7873,7 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>No kernel restart is needed for credentials. Restart the runtime after installing dependencies in Colab.</p>
+<p>No kernel restart is needed for credentials. In Colab, the setup cells below restart the runtime once after installing the dependencies.</p>
 </div>
 </div>
 </div>
@@ -7883,7 +7884,8 @@ a.anchor-link {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="Environment">Environment<a class="anchor-link" href="#Environment">¶</a></h2><p>Locally, run <code>uv sync --locked</code> and <code>uv run jupyter lab</code>. Select the project Python 3.13 kernel. The next cell only installs packages inside Google Colab, where the repository must be present. Colab uses its own Python runtime; the local uv project requires Python 3.13. See README for both paths.</p>
+<h2 id="Environment">Environment<a class="anchor-link" href="#Environment">¶</a></h2><p>Locally, run <code>uv sync --locked</code> and <code>uv run jupyter lab</code>, and select the project's Python 3.13 kernel.</p>
+<p>In Google Colab, first choose a GPU runtime (<em>Runtime → Change runtime type</em>). The next two cells clone the repository into <code>/content/Cleantech-RAG</code>, install the pinned dependencies and restart the runtime once. After the restart, run all cells again from the top (<em>Runtime → Run all</em>); the clone and installation are skipped the second time. See the README for details.</p>
 </div>
 </div>
 </div>
@@ -7892,33 +7894,23 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
 <span class="n">IN_COLAB</span> <span class="o">=</span> <span class="s2">"google.colab"</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span>
-<span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"requirements.txt"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-    <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">"Open the notebook from the cloned Cleantech-RAG repository."</span><span class="p">)</span>
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-<div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Colab: install the exported lock into the active notebook interpreter.</span>
-<span class="c1"># Locally, uv sync --locked has already installed everything.</span>
 <span class="k">if</span> <span class="n">IN_COLAB</span><span class="p">:</span>
-    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
-    <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"pip"</span><span class="p">,</span> <span class="s2">"install"</span><span class="p">,</span> <span class="s2">"-r"</span><span class="p">,</span> <span class="s2">"requirements.txt"</span><span class="p">])</span>
+    <span class="c1"># Opened via "Open in Colab", the notebook has no repository around it: clone it once.</span>
+    <span class="n">repo</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"/content/Cleantech-RAG"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">repo</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">([</span><span class="s2">"git"</span><span class="p">,</span> <span class="s2">"clone"</span><span class="p">,</span> <span class="s2">"--depth"</span><span class="p">,</span> <span class="s2">"1"</span><span class="p">,</span> <span class="s2">"https://github.com/DarthVeigar/Cleantech-RAG.git"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">repo</span><span class="p">)])</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">repo</span><span class="p">)</span>  <span class="c1"># the runtime restart resets the working directory, so change into the repository every time</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"requirements.txt"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">"Run the notebook from the Cleantech-RAG repository folder."</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -7929,10 +7921,30 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># After a Colab install, restart the runtime once, then resume with the imports below.</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Colab: install the pinned dependencies into Colab's interpreter once, then restart the runtime.</span>
+<span class="c1"># Locally, uv sync --locked has already installed everything.</span>
+<span class="k">if</span> <span class="n">IN_COLAB</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="s2">".colab_installed"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="s2">"-m"</span><span class="p">,</span> <span class="s2">"pip"</span><span class="p">,</span> <span class="s2">"install"</span><span class="p">,</span> <span class="s2">"-q"</span><span class="p">,</span> <span class="s2">"-r"</span><span class="p">,</span> <span class="s2">"requirements.txt"</span><span class="p">])</span>
+    <span class="n">Path</span><span class="p">(</span><span class="s2">".colab_installed"</span><span class="p">)</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Dependencies installed. The runtime restarts now: afterwards, run all cells again from the top."</span><span class="p">)</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">(),</span> <span class="mi">9</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># In Colab, the cell above restarts the runtime once after installing; run all cells again from the top afterwards.</span>
 </pre></div>
 </div>
 </div>
@@ -8000,6 +8012,12 @@ a.anchor-link {
 <span class="n">load_dotenv</span><span class="p">()</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">getpass</span><span class="w"> </span><span class="kn">import</span> <span class="n">getpass</span>
 
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"OPENAI_API_KEY"</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>  <span class="c1"># Colab: use the OPENAI_API_KEY secret if it exists and notebook access is granted</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">google.colab</span><span class="w"> </span><span class="kn">import</span> <span class="n">userdata</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"OPENAI_API_KEY"</span><span class="p">]</span> <span class="o">=</span> <span class="n">userdata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"OPENAI_API_KEY"</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">pass</span>
 <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s2">"OPENAI_API_KEY"</span><span class="p">):</span>
     <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">"OPENAI_API_KEY"</span><span class="p">]</span> <span class="o">=</span> <span class="n">getpass</span><span class="p">(</span><span class="s2">"OpenAI API key (not saved): "</span><span class="p">)</span>
 </pre></div>
