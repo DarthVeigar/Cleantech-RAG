@@ -59,14 +59,16 @@ Click the **Open in Colab** badge above, then:
 
 1. Choose a GPU runtime: *Runtime → Change runtime type* (see the memory note above).
 2. Add your OpenAI key as a Colab secret named `OPENAI_API_KEY` (key icon in the left sidebar) and allow notebook access. Without it, the notebook asks for the key.
-3. *Runtime → Run all*. The setup cells clone this repository into `/content/Cleantech-RAG`, install the pinned dependencies from `requirements.txt` into Colab's interpreter, and restart the runtime once.
+3. *Runtime → Run all*. The setup cells clone this repository into `/content/Cleantech-RAG`, install the workshop packages from `requirements-colab.txt` on top of Colab's preinstalled packages, and restart the runtime once.
 4. After the restart, *Runtime → Run all* again. The clone and installation are skipped, `data.zip` is downloaded from Google Drive and the notebook continues.
 
-The pinned requirements resolve for Linux on Python 3.12 and 3.13. Test them again on the Colab runtime available for your workshop date.
+Colab does not use the full lock: replacing Colab's IPython/Jupyter packages stops its kernel from starting. `requirements-colab.txt` pins only the packages whose API or data format the notebook and `data.zip` depend on (Chroma, LangChain, RAGAS, Transformers, Sentence Transformers). The install cell keeps Colab's kernel packages, PyTorch build and pandas at their installed versions as pip constraints. Keep the pins in `requirements-colab.txt` in sync with `uv.lock`, and test the Colab path again shortly before each workshop, since Colab's preinstalled packages change.
+
+If a runtime breaks anyway, use *Runtime → Disconnect and delete runtime* to get a fresh machine; a plain restart keeps the installed packages.
 
 ## Maintenance
 
-`pyproject.toml` declares direct dependencies; `uv.lock` fixes the resolved environment; `requirements.txt` is a generated export for Colab:
+`pyproject.toml` declares direct dependencies; `uv.lock` fixes the resolved environment; `requirements.txt` is a generated export of the full lock for pip-based environments:
 
 ```sh
 uv lock --upgrade

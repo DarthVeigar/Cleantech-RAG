@@ -1,0 +1,34 @@
+# Google Colab only (local setups use uv sync --locked; see README).
+# Installed on top of Colab's preinstalled packages. Colab's kernel stack (IPython, ipykernel,
+# Jupyter, traitlets, pandas, requests, ...) and its PyTorch build are kept as constraints by the
+# notebook's install cell; replacing them stops the Colab kernel from starting.
+# Exact pins: packages whose API or on-disk format the notebook and the shipped data.zip depend on.
+# Keep these in sync with uv.lock.
+chromadb==1.5.9
+langchain-chroma==1.1.0
+langchain-community==0.4.1
+langchain-core==1.7.4
+langchain-experimental==0.4.1
+langchain-huggingface==1.2.3
+langchain-openai==1.7.3
+langchain-text-splitters==1.1.3
+ragas==0.4.3
+sentence-transformers==5.7.0
+transformers==4.57.6
+# Use Colab's version if it is installed, otherwise the latest compatible one.
+datasets
+gdown
+kaggle
+langdetect
+lorem-text
+matplotlib
+numpy
+pandas
+plotly
+python-dotenv
+seaborn
+spacy
+textstat
+torch
+tqdm
+umap-learn

@@ -9,3 +9,4 @@ __pycache__/
 .ruff_cache/
 .ipynb_checkpoints/
 .colab_installed
+colab-constraints.txt
