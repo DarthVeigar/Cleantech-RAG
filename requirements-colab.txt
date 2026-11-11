@@ -1,6 +1,6 @@
 # Google Colab only (local setups use uv sync --locked; see README).
 # Installed on top of Colab's preinstalled packages. Colab's kernel stack (IPython, ipykernel,
-# Jupyter, traitlets, pandas, requests, ...) and its PyTorch build are kept as constraints by the
+# Jupyter, traitlets, ...), pandas and its PyTorch build are kept as constraints by the
 # notebook's install cell; replacing them stops the Colab kernel from starting.
 # Exact pins: packages whose API or on-disk format the notebook and the shipped data.zip depend on.
 # Keep these in sync with uv.lock.
